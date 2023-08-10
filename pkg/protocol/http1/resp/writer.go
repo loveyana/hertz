@@ -17,6 +17,7 @@
 package resp
 
 import (
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"sync"
 
 	"github.com/cloudwego/hertz/pkg/network"
@@ -43,16 +44,20 @@ func (c *chunkedBodyWriter) Write(p []byte) (n int, err error) {
 		if err = WriteHeader(&c.r.Header, c.w); err != nil {
 			return
 		}
+		hlog.Warnf("[chunk] write header, transfer encoding: %s", c.r.Header.Get("Transfer-Encoding"))
 		c.wroteHeader = true
 	}
 	if err = ext.WriteChunk(c.w, p, false); err != nil {
 		return
 	}
+	hlog.Warnf("[chunk] write body finished")
 	return len(p), nil
 }
 
 func (c *chunkedBodyWriter) Flush() error {
-	return c.w.Flush()
+	err := c.w.Flush()
+	hlog.Warnf("[chunk-flush] chunk flush")
+	return err
 }
 
 // Finalize will write the ending chunk as well as trailer and flush the writer.
@@ -60,6 +65,7 @@ func (c *chunkedBodyWriter) Flush() error {
 func (c *chunkedBodyWriter) Finalize() error {
 	c.Do(func() {
 		c.finalizeErr = ext.WriteChunk(c.w, nil, true)
+		hlog.Warnf("[chunk-Finalize] chunk finish")
 		if c.finalizeErr != nil {
 			return
 		}

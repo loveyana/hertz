@@ -45,6 +45,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"io"
 	"strings"
 
@@ -292,21 +293,27 @@ func WriteChunk(w network.Writer, b []byte, withFlush bool) (err error) {
 	if err = bytesconv.WriteHexInt(w, n); err != nil {
 		return err
 	}
-
+	hlog.Warnf("[write-chunk] write chunk body, len: %d", n)
 	w.WriteBinary(bytestr.StrCRLF) //nolint:errcheck
+	hlog.Warnf("[write-chunk] write chunk body, CRLF: %s", bytestr.StrCRLF)
 	if _, err = w.WriteBinary(b); err != nil {
 		return err
 	}
+	hlog.Warnf("[write-chunk] write chunk body, content: %s", b)
 
 	// If it is the end of chunk, write CRLF after writing trailer
 	if n > 0 {
 		w.WriteBinary(bytestr.StrCRLF) //nolint:errcheck
+		hlog.Warnf("[write-chunk] write chunk body, CRLF: %s", bytestr.StrCRLF)
 	}
 
 	if !withFlush {
+		hlog.Warnf("[write-chunk] without flush")
 		return nil
 	}
+
 	err = w.Flush()
+	hlog.Warnf("[write-chunk] without flush")
 	return
 }
 
