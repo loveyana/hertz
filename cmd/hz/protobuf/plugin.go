@@ -364,7 +364,7 @@ func (plugin *Plugin) GenerateFile(gen *protogen.Plugin, f *protogen.File) error
 	if strings.HasPrefix(impt, plugin.Package) {
 		impt = impt[len(plugin.Package):]
 	}
-	f.GeneratedFilenamePrefix = filepath.Join(util.ImportToPath(impt, ""), util.BaseName(f.Proto.GetName(), ".proto"))
+	f.GeneratedFilenamePrefix = filepath.Join(".", util.ImportToPath(impt, ""), util.BaseName(f.Proto.GetName(), ".proto"))
 	f.Generate = true
 	// if use third-party model, no model code is generated within the project
 	if len(plugin.UseDir) != 0 {
